@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jb.gerenciapessoaapi.DTO.PessoaDTO;
 import com.jb.gerenciapessoaapi.filter.PessoaFilter;
+import com.jb.gerenciapessoaapi.mapper.PessoaMapper;
 import com.jb.gerenciapessoaapi.model.Pessoa;
 import com.jb.gerenciapessoaapi.repository.PessoaRepository;
 import com.jb.gerenciapessoaapi.service.PessoaService;
@@ -33,6 +34,9 @@ public class PessoaResource {
 	private PessoaService pessoaService;
 	
 	@Autowired
+	private PessoaMapper pessoaMapper;
+	
+	@Autowired
 	private PessoaRepository pessoaRepository;
 	
 	@GetMapping("/listar-todas")
@@ -42,19 +46,21 @@ public class PessoaResource {
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<PessoaDTO> buscarPeloId(@PathVariable("id") Long id) {
-		 PessoaDTO pessoa = pessoaService.buscarPorId(id);
+		 PessoaDTO pessoa = pessoaMapper.converteEntidadeParaDto(pessoaService.buscarPorId(id));
 		return ResponseEntity.ok(pessoa);
 	}
 	
 	@PostMapping
-	public ResponseEntity<PessoaDTO> criar(@Valid @RequestBody PessoaDTO pessoa) {
-		PessoaDTO pessoaSalva = pessoaService.salvar(pessoa);
+	public ResponseEntity<PessoaDTO> criar(@Valid @RequestBody PessoaDTO pessoaDTO) {
+		Pessoa pessoa = pessoaMapper.converteDtoParaEntidade(pessoaDTO);
+		PessoaDTO pessoaSalva = pessoaMapper.converteEntidadeParaDto(pessoaService.salvar(pessoa)) ;
 		return ResponseEntity.status(HttpStatus.CREATED).body(pessoaSalva);
 	}
 	
 	@PutMapping
-	public ResponseEntity<PessoaDTO> atualizar(@Valid @RequestBody PessoaDTO pessoa) {
-		PessoaDTO pessoaSalva = pessoaService.atualizar(pessoa);
+	public ResponseEntity<PessoaDTO> atualizar(@Valid @RequestBody PessoaDTO pessoaDTO) {
+		Pessoa pessoa = pessoaMapper.converteDtoParaEntidade(pessoaDTO);
+		PessoaDTO pessoaSalva = pessoaMapper.converteEntidadeParaDto(pessoaService.atualizar(pessoa)) ;
 		return ResponseEntity.ok(pessoaSalva);
 	}
 	

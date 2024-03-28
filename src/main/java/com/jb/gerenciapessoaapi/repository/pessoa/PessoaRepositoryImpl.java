@@ -3,7 +3,6 @@ package com.jb.gerenciapessoaapi.repository.pessoa;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess.Item;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -35,8 +34,6 @@ public class PessoaRepositoryImpl implements PessoaRepositoryQuery {
 		
 		TypedQuery<Pessoa> query = manager.createQuery(criteria);
 		adicionarRestricoesDePaginacao(query, pageable);
-		
-		 System.out.println("valores banco: " + query.getResultList().get(0).getNome());
 		
 		return new PageImpl<Pessoa>(query.getResultList(), pageable, total(pessoaFilter));
 	}
@@ -73,6 +70,5 @@ public class PessoaRepositoryImpl implements PessoaRepositoryQuery {
 		criteria.select(builder.count(root));
 		return manager.createQuery(criteria).getSingleResult();
 	}
-
 	
 }

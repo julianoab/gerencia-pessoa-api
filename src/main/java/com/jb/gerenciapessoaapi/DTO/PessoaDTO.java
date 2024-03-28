@@ -3,19 +3,25 @@ package com.jb.gerenciapessoaapi.DTO;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.jb.gerenciapessoaapi.model.Contato;
+import org.hibernate.validator.constraints.br.CPF;
+
+import jakarta.validation.constraints.NotNull;
 
 public class PessoaDTO {
 	
 	private Long id;
 	
+	@NotNull(message = "Nome é obrigatóario")
 	private String nome;
 	
+	@CPF(message = "Cpf inválido")
 	private String cpf;
 	
+	@NotNull(message = "Data nascimento é obrigatória")
 	private LocalDate dataNascimento;
 	
-	private List<Contato> contatos;
+	@NotNull(message = "Necessário no minimo um contato")
+	private List<ContatoDTO> contatos;
 
 	public Long getId() {
 		return id;
@@ -49,11 +55,11 @@ public class PessoaDTO {
 		this.dataNascimento = dataNascimento;
 	}
 
-	public List<Contato> getContatos() {
+	public List<ContatoDTO> getContatos() {
 		return contatos;
 	}
 
-	public void setContatos(List<Contato> contatos) {
+	public void setContatos(List<ContatoDTO> contatos) {
 		this.contatos = contatos;
 	}
 	

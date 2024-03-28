@@ -8,7 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.jb.gerenciapessoaapi.service.exception.BusinessException;
+import com.jb.gerenciapessoaapi.service.exception.NegocioException;
 import com.jb.gerenciapessoaapi.service.exception.RegistroNaoEncontradoException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,8 +16,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class ResourceExceptionHandler {
 	
-	@ExceptionHandler(BusinessException.class)
-	public ResponseEntity<StandardError> violacaoRegraNegocio(BusinessException e, HttpServletRequest request) {
+	@ExceptionHandler(NegocioException.class)
+	public ResponseEntity<StandardError> violacaoRegraNegocio(NegocioException e, HttpServletRequest request) {
 		StandardError err = new StandardError();
 		err.setTimestamp(Instant.now());
 		err.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -49,6 +49,5 @@ public class ResourceExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
 	}
-	
 	
 }

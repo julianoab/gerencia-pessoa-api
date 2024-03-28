@@ -10,20 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.jb.gerenciapessoaapi.DTO.PessoaDTO;
-import com.jb.gerenciapessoaapi.mapper.PessoaMapper;
 import com.jb.gerenciapessoaapi.model.Contato;
 import com.jb.gerenciapessoaapi.model.Pessoa;
 import com.jb.gerenciapessoaapi.repository.ContatoRepository;
 import com.jb.gerenciapessoaapi.repository.PessoaRepository;
-import com.jb.gerenciapessoaapi.service.exception.BusinessException;
+import com.jb.gerenciapessoaapi.service.exception.NegocioException;
 import com.jb.gerenciapessoaapi.service.exception.RegistroNaoEncontradoException;
 
 @Service
 public class PessoaService {
-	
-	@Autowired
-	private PessoaMapper pessoaMapper;
 	
 	@Autowired
 	private PessoaRepository pessoaRepository;
@@ -32,8 +27,7 @@ public class PessoaService {
 	private ContatoRepository contatoRepository;
 	
 	@Transactional
-	public PessoaDTO salvar(PessoaDTO pessoaDTO) {
-		Pessoa pessoa = pessoaMapper.converteDtoParaEntidade(pessoaDTO);
+	public Pessoa salvar(Pessoa pessoa) {
 		validaInformacoesPessoa(pessoa);
 
 		for (Contato contato : pessoa.getContatos()) {
@@ -42,25 +36,30 @@ public class PessoaService {
 		pessoa = pessoaRepository.save(pessoa);
 		contatoRepository.saveAll(pessoa.getContatos());
 		
-		return pessoaMapper.converteEntidadeParaDto(pessoa);
+		return pessoa;
 	}
 	
-	public PessoaDTO buscarPorId(Long id) {
-		Optional<Pessoa> pessoa = Optional.ofNullable(pessoaRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Pessoa não encontrada")));
-		return pessoaMapper.converteEntidadeParaDto(pessoa.get());
+	@Transactional(readOnly = true)
+	public Pessoa buscarPorId(Long id) {
+		Optional<Pessoa> pessoa = Optional.ofNullable(pessoaRepository.findById(id).orElseThrow(
+				() -> new RegistroNaoEncontradoException("Pessoa não encontrada.")));
+		return pessoa.get();
 	}
 	
-	public PessoaDTO atualizar(PessoaDTO pessoa) {
-		Pessoa pessoaSalva = pessoaMapper.converteDtoParaEntidade(buscarPorId(pessoa.getId()));
-		removerContatos(pessoaMapper.converteDtoParaEntidade(pessoa), pessoaSalva);
+	public Pessoa atualizar(Pessoa pessoa) {
+		Pessoa pessoaSalva = buscarPorId(pessoa.getId());
+		removerContatos(pessoa, pessoaSalva);
 		
 		BeanUtils.copyProperties(pessoa, pessoaSalva, "id");
 		
-		return salvar(pessoaMapper.converteEntidadeParaDto(pessoaSalva));
+		return salvar(pessoaSalva);
 	}
 	
+	@Transactional
 	public void excluir(Long id) {
-		pessoaRepository.deleteById(id);
+		Optional<Pessoa> pessoa = Optional.ofNullable(pessoaRepository.findById(id).orElseThrow(
+				() -> new RegistroNaoEncontradoException("Registro não encotrado para exclusão.")));
+		pessoaRepository.deleteById(pessoa.get().getId());
 	}
 	
 	private void validaInformacoesPessoa(Pessoa pessoa) {
@@ -70,24 +69,24 @@ public class PessoaService {
 	
 	private void validaDataNascimentoFutura(Pessoa pessoa) {
 		if (pessoa.getDataNascimento().isAfter(LocalDate.now())) {
-			throw new BusinessException("Data de nascimento não pode ser maior que data atual");
+			throw new NegocioException("Data de nascimento não pode ser maior que data atual");
 		}
 	}
 	
 	private void validaSePessoaTemContato(Pessoa pessoa) {
 		if (pessoa.getContatos() == null || pessoa.getContatos().isEmpty() || pessoa.getContatos().size() == 0) {
-			throw new BusinessException("Pessoa precisa ter pelo menos um contato");
+			throw new NegocioException("Pessoa precisa ter pelo menos um contato");
 		}
 	}
 	
-	private void removerContatos(Pessoa pessoaAlterada, Pessoa pessoaSalva) {
+	protected void removerContatos(Pessoa pessoaAlterada, Pessoa pessoaSalva) {
 		List<Contato> contatosAremover = this.getContatosParaSeremDeletados(pessoaAlterada, pessoaSalva);
 		if (contatosAremover.size() > 0 && !contatosAremover.isEmpty()) {
 			contatoRepository.deleteAll(contatosAremover);
 		}
 	}
 	
-	private List<Contato> getContatosParaSeremDeletados(Pessoa pessoaAlterada, Pessoa pessoaPersistida) {
+	protected List<Contato> getContatosParaSeremDeletados(Pessoa pessoaAlterada, Pessoa pessoaPersistida) {
 		List<Contato> contatosASeremExcluidos = new ArrayList<>();
 		
 		for (Contato contatoPersistido : pessoaPersistida.getContatos()) {

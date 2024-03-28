@@ -5,10 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-import org.hibernate.validator.constraints.br.CPF;
-
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,22 +21,16 @@ public class Pessoa implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-//    @Column(name = "id")
-//	@GeneratedValue(strategy = GenerationType.AUTO)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	@NotNull
-//	@Column(name = "nome", nullable = false)
 	private String nome;
 	
 	@NotNull
-	@CPF
-//	@Column(name = "cpf", nullable = false)
 	private String cpf;
 	
-	@NotNull(message = "Data de Nascimento não pode ser nula")
-//	@Column(name = "data_nascimento", nullable = false)
+	@NotNull
 	private LocalDate dataNascimento;
 	
 	@OneToMany(mappedBy = "pessoa", cascade = CascadeType.ALL)
@@ -47,6 +38,14 @@ public class Pessoa implements Serializable {
 	
 	public Pessoa() {}
 	
+	public Pessoa(Long id, @NotNull String nome, @NotNull String cpf, @NotNull LocalDate dataNascimento, List<Contato> contatos) {
+		this.id = id;
+		this.nome = nome;
+		this.cpf = cpf;
+		this.dataNascimento = dataNascimento;
+		this.contatos = contatos;
+	}
+
 	public Long getId() {
 		return id;
 	}

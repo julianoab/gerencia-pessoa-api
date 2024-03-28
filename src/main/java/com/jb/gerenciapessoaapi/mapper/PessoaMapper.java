@@ -3,6 +3,7 @@ package com.jb.gerenciapessoaapi.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import com.jb.gerenciapessoaapi.DTO.PessoaDTO;
@@ -11,9 +12,8 @@ import com.jb.gerenciapessoaapi.model.Pessoa;
 @Configuration
 public class PessoaMapper {
 	
-	public List<PessoaDTO> converteListaEntidadeParaDTO(List<Pessoa> pessoas) {
-		return pessoas.stream().map(this::converteEntidadeParaDto).collect(Collectors.toList());
-	}
+	@Autowired
+	private ContatoMapper contatoMapper;
 	
 	public Pessoa converteDtoParaEntidade(PessoaDTO pessoaDTO) {
 		Pessoa pessoa = new Pessoa();
@@ -21,7 +21,7 @@ public class PessoaMapper {
 		pessoa.setNome(pessoaDTO.getNome());
 		pessoa.setCpf(pessoaDTO.getCpf());
 		pessoa.setDataNascimento(pessoaDTO.getDataNascimento());
-		pessoa.setContatos(pessoaDTO.getContatos());
+		pessoa.setContatos(contatoMapper.converteListaDTOParaEntidade(pessoaDTO.getContatos()));
 
 		return pessoa;
 	}
@@ -32,8 +32,17 @@ public class PessoaMapper {
 		pessoaDTO.setNome(pessoa.getNome());
 		pessoaDTO.setCpf(pessoa.getCpf());
 		pessoaDTO.setDataNascimento(pessoa.getDataNascimento());
-		pessoaDTO.setContatos(pessoa.getContatos());
+		pessoaDTO.setContatos(contatoMapper.converteListaEntidadeParaDTO(pessoa.getContatos()));
 		
 		return pessoaDTO;
 	}
+	
+	public List<PessoaDTO> converteListaEntidadeParaDTO(List<Pessoa> pessoas) {
+		return pessoas.stream().map(this::converteEntidadeParaDto).collect(Collectors.toList());
+	}
+	
+	public List<Pessoa> converteListaDTOParaEntidade(List<PessoaDTO> pessoasDTO) {
+		return pessoasDTO.stream().map(this::converteDtoParaEntidade).collect(Collectors.toList());
+	}
+	
 }

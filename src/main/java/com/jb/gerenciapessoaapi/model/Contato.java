@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,21 +22,17 @@ public class Contato implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-//    @Column(name = "id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	@NotNull
-//	@Column(name = "nome", nullable = false)
 	private String nome;
 	
 	@NotNull
-//	@Column(name = "tefone", nullable = false)
 	private String telefone;
 	
 	@Email
 	@NotNull
-//	@Column(name = "email", nullable = false)
 	private String email;
 	
 	@JsonIgnore
@@ -47,6 +42,14 @@ public class Contato implements Serializable {
 	
 	public Contato() {}
 	
+	public Contato(Long id, @NotNull String nome, @NotNull String telefone, @Email @NotNull String email, Pessoa pessoa) {
+		this.id = id;
+		this.nome = nome;
+		this.telefone = telefone;
+		this.email = email;
+		this.pessoa = pessoa;
+	}
+
 	public Long getId() {
 		return id;
 	}
